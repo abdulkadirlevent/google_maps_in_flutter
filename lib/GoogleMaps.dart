@@ -16,7 +16,9 @@ class _GoogleMapsState extends State<GoogleMaps> {
   // TODO: add state variables and methods
   Completer<GoogleMapController> _controller = Completer();
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+  MapType _currentMapType = MapType.normal;
   final key = new GlobalKey<ScaffoldState>();
+  bool selectedData = true;
 
   static final CameraPosition _evKamreaPosPlex = CameraPosition(
     target: LatLng(41.123683, 28.7714727),
@@ -67,7 +69,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
         ),
         drawer: _drawer(),
         body: GoogleMap(
-          mapType: MapType.normal, // MapType.hybrid uydu görünümü
+          mapType: _currentMapType, // MapType.hybrid uydu görünümü
           initialCameraPosition: _evKamreaPosPlex,
           markers: Set<Marker>.of(markers.values),
           onMapCreated: (GoogleMapController controller) {
@@ -189,7 +191,19 @@ class _GoogleMapsState extends State<GoogleMaps> {
               _showToast(context,'Konumunuz bulunuyor...');
             },
           ),
-
+          Divider(),
+          CheckboxListTile(
+            title: Text( selectedData ? "Görünüm normal" : "Görünüm hybrid"),
+            value: selectedData,
+            onChanged: (bool value){
+              setState(() {
+                Navigator.of(context).pop();
+                selectedData = value;
+                _currentMapType = _currentMapType == MapType.normal ? MapType.hybrid : MapType.normal;
+              });
+            },
+            secondary: Icon(Icons.language),
+          ),
         ],
       ),
     );
