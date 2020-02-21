@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -41,6 +43,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
     final GoogleMapController controller = await _controller.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(_isYeriKamreaPos));
   }
+
   Future<void> _eveGit() async {
     final GoogleMapController controller = await _controller.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(_evKamreaPos));
@@ -68,14 +71,41 @@ class _GoogleMapsState extends State<GoogleMaps> {
           title: Text(widget.title),
         ),
         drawer: _drawer(),
-        body: GoogleMap(
-          mapType: _currentMapType, // MapType.hybrid uydu görünümü
-          initialCameraPosition: _evKamreaPosPlex,
-          markers: Set<Marker>.of(markers.values),
-          onMapCreated: (GoogleMapController controller) {
-            _controller.complete(controller);
-          },
-        ),
+        body: Column(
+               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width, // or use fixed size like 200
+                    height: 200,
+                    child: Container(
+                      alignment: Alignment.center,
+                      color: Colors.red, child: Text("Top Container", style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24),),),
+                  ),
+
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width, // or use fixed size like 200
+                    height: 200,
+                    child: GoogleMap(
+                      mapType: _currentMapType, // MapType.hybrid uydu görünümü
+                      initialCameraPosition: _evKamreaPosPlex,
+                      markers: Set<Marker>.of(markers.values),
+                      onMapCreated: (GoogleMapController controller) {
+                        _controller.complete(controller);
+                      },
+                      gestureRecognizers: <
+                          Factory<OneSequenceGestureRecognizer>>[
+                        Factory<OneSequenceGestureRecognizer>(() =>
+                            EagerGestureRecognizer())
+                      ].toSet(),),),
+
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width, // or use fixed size like 200
+                    height: 200,
+                    child: Container(
+                      alignment: Alignment.center,
+                      color: Colors.red, child: Text("Bottom Container", style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 24),),),
+                  ),
+                ]),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _eveGit,
           tooltip: 'Zoom',
@@ -90,10 +120,14 @@ class _GoogleMapsState extends State<GoogleMaps> {
     final MarkerId markerId1 = MarkerId("Leventler");
     final Marker marker = Marker(
       markerId: markerId1,
-      position: LatLng(41.0725272, 28.7954135,),
-      infoWindow: InfoWindow(title: "Leventler Asansör", snippet: 'Hoşgeldiniz.'),
+      position: LatLng(
+        41.0725272,
+        28.7954135,
+      ),
+      infoWindow:
+          InfoWindow(title: "Leventler Asansör", snippet: 'Hoşgeldiniz.'),
       onTap: () {
-        _showToast(context,'Navigasyonu başlat işe git');
+        _showToast(context, 'Navigasyonu başlat işe git');
         //navigasyonu başlatabilirsin
       },
     );
@@ -107,9 +141,10 @@ class _GoogleMapsState extends State<GoogleMaps> {
     final Marker marker = Marker(
       markerId: markerId1,
       position: LatLng(41.123683, 28.7714727),
-      infoWindow: InfoWindow(title: "Bizim evimiz", snippet: 'Sizi bize bekliyoruz.'),
+      infoWindow:
+          InfoWindow(title: "Bizim evimiz", snippet: 'Sizi bize bekliyoruz.'),
       onTap: () {
-        _showToast(context,'Navigasyonu başlat eve git');
+        _showToast(context, 'Navigasyonu başlat eve git');
         //navigasyonu başlatabilirsin
       },
     );
@@ -119,7 +154,8 @@ class _GoogleMapsState extends State<GoogleMaps> {
   }
 
   void _getLocation() async {
-    var currentLocation = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+    var currentLocation = await Geolocator()
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
     final GoogleMapController controller = await _controller.future;
 
     setState(() {
@@ -128,19 +164,26 @@ class _GoogleMapsState extends State<GoogleMaps> {
       final marker = Marker(
         markerId: markerId1,
         position: LatLng(currentLocation.latitude, currentLocation.longitude),
-        infoWindow: InfoWindow(title: 'Sizin konumunuz', snippet: 'Buradasınız.' + currentLocation.latitude.toString() + " " + currentLocation.longitude.toString()),
+        infoWindow: InfoWindow(
+            title: 'Sizin konumunuz',
+            snippet: 'Buradasınız.' +
+                currentLocation.latitude.toString() +
+                " " +
+                currentLocation.longitude.toString()),
       );
       markers[markerId1] = marker;
-      controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-        target: LatLng(currentLocation.latitude, currentLocation.longitude),
-        zoom: 17,
-      ),
-      ),);
-    }
-    );
+      controller.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(currentLocation.latitude, currentLocation.longitude),
+            zoom: 17,
+          ),
+        ),
+      );
+    });
   }
 
-  Widget _drawer(){
+  Widget _drawer() {
     return Drawer(
       elevation: 16.0,
       child: Column(
@@ -170,7 +213,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
             onTap: () async {
               Navigator.of(context).pop();
               _iseGit();
-              _showToast(context,'İş Adresine gidiliyor');
+              _showToast(context, 'İş Adresine gidiliyor');
             },
           ),
           ListTile(
@@ -179,7 +222,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
             onTap: () async {
               Navigator.of(context).pop();
               _eveGit();
-              _showToast(context,'Ev adresine gidiliyor');
+              _showToast(context, 'Ev adresine gidiliyor');
             },
           ),
           ListTile(
@@ -188,18 +231,20 @@ class _GoogleMapsState extends State<GoogleMaps> {
             onTap: () async {
               Navigator.of(context).pop();
               _getLocation();
-              _showToast(context,'Konumunuz bulunuyor...');
+              _showToast(context, 'Konumunuz bulunuyor...');
             },
           ),
           Divider(),
           CheckboxListTile(
-            title: Text( selectedData ? "Görünüm normal" : "Görünüm hybrid"),
+            title: Text(selectedData ? "Görünüm normal" : "Görünüm hybrid"),
             value: selectedData,
-            onChanged: (bool value){
+            onChanged: (bool value) {
               setState(() {
                 Navigator.of(context).pop();
                 selectedData = value;
-                _currentMapType = _currentMapType == MapType.normal ? MapType.hybrid : MapType.normal;
+                _currentMapType = _currentMapType == MapType.normal
+                    ? MapType.hybrid
+                    : MapType.normal;
               });
             },
             secondary: Icon(Icons.language),
